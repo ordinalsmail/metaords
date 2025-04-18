@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta Ords Enhanced Collection Generator</title>
+    <style>
+        /* ---------- Base Variables ---------- */
+        :root {
+            /* Core Colors */
+            --glow-red: #ff4444; --glow-blue: #44ddff; --glow-green: #44ff44;
+            --glow-yellow: #ffff44; --glow-cyan: #00ffff; --glow-magenta: #ff00ff;
+            --glow-white: #ffffff; --glow-orange: #ffaa44; --glow-purple: #cc88ff;
+            
+            /* Metallic Colors */
+            --copper-dark: #8D6E63; --copper-mid: #d84315; --copper-light: #ffccbc;
+            --gold-dark: #F9A825; --gold-mid: #FDD835; --gold-light: #FFF59D;
+            --steel-dark: #607D8B; --steel-mid: #B0BEC5; --steel-light: #ECEFF1;
+            
+            /* Theme Colors */
+            --neon-pink: #ff00ff;
+            --toxic-green: #39ff14;
+            --deep-purple: #6900ff;
+            --electric-blue: #00e1ff;
+            --sunset-orange: #ff5e00;
+            --cyber-teal: #00ffd0;
+        }
+
+        /* ---------- Base Styles ---------- */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f0f1a, #1a0a20);
+            font-family: Arial, sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* ---------- Ord Wrapper ---------- */
+        .ord-wrapper {
+            position: relative;
+            width: 485px;
+            height: 485px;
+            border-radius: 50%;  /*change to 50% for a circle around ordinal*/
+            overflow: visible;
+            transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            background-color: transparent; /* Default */
+            transition: background-color 0.3s ease;
+        }
+        
+        .ord-wrapper:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 40px rgba(80, 80, 120, 0.6);
+        }
+        
+        /* Inscription Info */
+        .inscription-info {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            color: white;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 100;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .ord-wrapper:hover .inscription-info {
+            opacity: 1;
+        }
+
+        /* ---------- Layers Structure ---------- */
+        .base-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 0;
+            transition: filter 0.5s ease;
+            background-color: transparent; /* Default */
+            transition: background-color 0.3s ease;
+        }
+        
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            mix-blend-mode: overlay;
+            transition: opacity 0.5s ease;
+        }
+
+        /* ---------- Base Transformations ---------- */
+        /* Original color variations */
+        .filter-original .base-image { filter: none; }
+        .filter-vibrant .base-image { filter: saturate(1.8) contrast(1.2); }
+        .filter-cool .base-image { filter: hue-rotate(180deg) saturate(1.5); }
+        .filter-warm .base-image { filter: hue-rotate(-30deg) saturate(1.4); }
+        
+        /* Metallic variations */
+        .filter-chrome .base-image { filter: grayscale(0.8) brightness(1.3) contrast(1.3); }
+        .filter-gold .base-image { filter: sepia(0.8) hue-rotate(10deg) saturate(1.8) brightness(1.1); }
+        .filter-copper .base-image { filter: sepia(0.6) hue-rotate(-20deg) saturate(1.5); }
+        
+        /* Special variations */
+        .filter-invert .base-image { filter: invert(1); }
+        .filter-xray .base-image { filter: invert(0.8) hue-rotate(180deg) brightness(1.3); }
+        .filter-blueprint .base-image { filter: brightness(1.2) contrast(0.8) invert(1) sepia(1) hue-rotate(190deg) saturate(20); }
+        .filter-duotone .base-image { filter: contrast(1.5) grayscale(1) sepia(1) hue-rotate(230deg); }
+        .filter-acid .base-image { filter: hue-rotate(110deg) saturate(2.5) contrast(1.3) brightness(1.1); }
+        .filter-ghost .base-image { filter: brightness(1.4) contrast(0.9) grayscale(0.4) hue-rotate(210deg) opacity(0.8); }
+        
+        /* Animated filters */
+        .filter-iridescent .base-image { animation: color-shift 10s infinite linear; }
+        .filter-glitch .base-image { animation: glitch-filter 10s infinite; }
+        .filter-pulse .base-image { animation: pulse-filter 4s infinite alternate; }
+        .filter-disco .base-image { animation: disco-filter 6s infinite; }
+        .filter-rainbow .base-image { animation: rainbow-shift 8s infinite linear; }
+        .filter-static .base-image { animation: static-filter 0.5s infinite; }
+        
+        /* Filter animations */
+        @keyframes color-shift {
+            0% { filter: hue-rotate(0deg) saturate(1.5); }
+            100% { filter: hue-rotate(360deg) saturate(1.5); }
+        }
+        
+        @keyframes glitch-filter {
+            0%, 100% { filter: none; }
+            10% { filter: hue-rotate(90deg) saturate(200%) contrast(150%); }
+            15% { filter: hue-rotate(0deg); }
+            20% { filter: invert(100%); }
+            25% { filter: none; }
+            40% { filter: hue-rotate(180deg) saturate(150%) contrast(120%); }
+            45% { filter: hue-rotate(0deg); }
+            46% { filter: none; }
+        }
+        
+        @keyframes pulse-filter {
+            0% { filter: saturate(1) brightness(1); }
+            100% { filter: saturate(1.5) brightness(1.2); }
+        }
+        
+        @keyframes disco-filter {
+            0% { filter: hue-rotate(0deg) saturate(2) brightness(1); }
+            33% { filter: hue-rotate(120deg) saturate(2) brightness(1.1); }
+            66% { filter: hue-rotate(240deg) saturate(2) brightness(1.2); }
+            100% { filter: hue-rotate(360deg) saturate(2) brightness(1); }
+        }
+        
+        @keyframes rainbow-shift {
+            0% { filter: hue-rotate(0deg) saturate(1.8) brightness(1.1); }
+            20% { filter: hue-rotate(72deg) saturate(1.8) brightness(1.1); }
+            40% { filter: hue-rotate(144deg) saturate(1.8) brightness(1.1); }
+            60% { filter: hue-rotate(216deg) saturate(1.8) brightness(1.1); }
+            80% { filter: hue-rotate(288deg) saturate(1.8) brightness(1.1); }
+            100% { filter: hue-rotate(360deg) saturate(1.8) brightness(1.1); }
+        }
+        
+        @keyframes static-filter {
+            0% { filter: brightness(1) contrast(1); }
+            25% { filter: brightness(1.1) contrast(1.1); }
+            50% { filter: brightness(0.9) contrast(1.1); }
+            75% { filter: brightness(1.1) contrast(0.9); }
+            100% { filter: brightness(1) contrast(1); }
+        }
+
+        /* ---------- Overlay Styles ---------- */
+        /* Gradient overlays */
+        .overlay-neon-glow {
+            background: radial-gradient(circle, var(--neon-pink) 0%, transparent 70%);
+            mix-blend-mode: screen;
+            opacity: 0.7;
+            animation: pulse-glow 3s infinite alternate;
+        }
+        
+        .overlay-cyberpunk {
+            background: linear-gradient(135deg, var(--neon-pink) 0%, var(--cyber-teal) 100%);
+            mix-blend-mode: color-dodge;
+            opacity: 0.5;
+        }
+        
+        .overlay-rainbow {
+            background: conic-gradient(red, orange, yellow, green, blue, indigo, violet, red);
+            mix-blend-mode: overlay;
+            opacity: 0.4;
+            animation: rotate-gradient 10s linear infinite;
+        }
+        
+        .overlay-noise {
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsdGVyPSJ1cmwoI25vaXNlKSIgb3BhY2l0eT0iMC4zIi8+PC9zdmc+');
+            mix-blend-mode: overlay;
+            opacity: 0.4;
+        }
+        
+        .overlay-vaporwave {
+            background: linear-gradient(135deg, #ff71ce, #01cdfe, #05ffa1);
+            mix-blend-mode: lighten;
+            opacity: 0.5;
+        }
+        
+        .overlay-matrix {
+            background-color: rgba(0, 255, 0, 0.15);
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+PHRleHQgeD0iMTAiIHk9IjIwIiBmb250LWZhbWlseT0ibW9ub3NwYWNlIiBmb250LXNpemU9IjIwIiBmaWxsPSIjMDBmZjAwIj4xPC90ZXh0Pjx0ZXh0IHg9IjMwIiB5PSI0MCIgZm9udC1mYW1pbHk9Im1vbm9zcGFjZSIgZm9udC1zaXplPSIyMCIgZmlsbD0iIzAwZmYwMCI+MDwvdGV4dD48L3N2Zz4=');
+            mix-blend-mode: screen;
+            opacity: 0.5;
+        }
+        
+        .overlay-glitch {
+            position: relative;
+            opacity: 0.4;
+        }
+        
+        .overlay-glitch::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 0, 255, 0.5);
+            mix-blend-mode: screen;
+            animation: glitch-anim 4s infinite;
+        }
+        
+        .overlay-scanline {
+            background-image: repeating-linear-gradient(
+                to bottom,
+                transparent,
+                transparent 2px,
+                rgba(255, 255, 255, 0.1) 2px,
+                rgba(255, 255, 255, 0.1) 4px
+            );
+            opacity: 0.3;
+        }
+        
+        .overlay-holographic {
+            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.4) 100%);
+            mix-blend-mode: overlay;
+            opacity: 0.6;
+            animation: hologram-shift 5s infinite alternate;
+        }
+        
+        .overlay-solar-flare {
+            background: radial-gradient(circle, rgba(255,255,0,0.5) 0%, rgba(255,140,0,0.5) 50%, transparent 70%);
+            mix-blend-mode: screen;
+            opacity: 0.6;
+            animation: flare-pulse 4s infinite alternate;
+        }
+        
+        /* Overlay animations */
+        @keyframes pulse-glow {
+            0% { opacity: 0.5; }
+            100% { opacity: 0.8; }
+        }
+        
+        @keyframes rotate-gradient {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes glitch-anim {
+            0%, 100% { transform: translate(0); opacity: 0.4; }
+            10% { transform: translate(-5px, 5px); opacity: 0.5; }
+            20% { transform: translate(5px, -5px); opacity: 0.6; }
+            30% { transform: translate(-5px, -5px); opacity: 0.5; }
+            40% { transform: translate(0); opacity: 0.4; }
+            50% { transform: translate(0); opacity: 0.4; }
+            60% { transform: translate(5px, 5px); opacity: 0.5; }
+            70% { transform: translate(-5px, 5px); opacity: 0.6; }
+            80% { transform: translate(0); opacity: 0.4; }
+        }
+        
+        @keyframes hologram-shift {
+            0% { background-position: 0% 0%; opacity: 0.5; }
+            100% { background-position: 100% 100%; opacity: 0.7; }
+        }
+        
+        @keyframes flare-pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.1); opacity: 0.7; }
+        }
+
+        /* ---------- Animation Effects ---------- */
+        /* Base animation styles */
+        .anim-none { animation: none; }
+        
+        .anim-pulse {
+            animation: pulse-effect 3s ease-in-out infinite alternate;
+        }
+        
+        .anim-rotate {
+            animation: rotate-effect 20s linear infinite;
+        }
+        
+        .anim-float {
+            animation: float-effect 6s ease-in-out infinite;
+        }
+        
+        .anim-glitch {
+            animation: glitch-effect 10s infinite;
+        }
+        
+        .anim-shake {
+            animation: shake-effect 0.5s ease-in-out infinite;
+        }
+        
+        .anim-bounce {
+            animation: bounce-effect 2s ease infinite;
+        }
+        
+        .anim-breathe {
+            animation: breathe-effect 4s ease-in-out infinite;
+        }
+        
+        .anim-vibrate {
+            animation: vibrate-effect 0.2s linear infinite;
+        }
+        
+        .anim-flicker {
+            animation: flicker-effect 4s infinite;
+        }
+        
+        .anim-ripple {
+            animation: ripple-effect 3s infinite;
+            position: relative;
+        }
+        
+        .anim-ripple::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: ripple-ring 3s ease-out infinite;
+            z-index: -1;
+        }
+        
+        .anim-hover {
+            animation: hover-effect 4s ease-in-out infinite;
+        }
+        
+        /* Animation keyframes */
+        @keyframes pulse-effect {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+        
+        @keyframes rotate-effect {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes float-effect {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes glitch-effect {
+            0%, 100% { transform: translate(0); }
+            10% { transform: translate(-5px, 5px); }
+            30% { transform: translate(5px, -5px); }
+            50% { transform: translate(-5px, -5px); }
+            70% { transform: translate(5px, 5px); }
+            90% { transform: translate(-5px, 5px); }
+        }
+        
+        @keyframes shake-effect {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        @keyframes bounce-effect {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes breathe-effect {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        
+        @keyframes vibrate-effect {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-1px); }
+            50% { transform: translateX(0); }
+            75% { transform: translateX(1px); }
+        }
+        
+        @keyframes flicker-effect {
+            0%, 100% { opacity: 1; }
+            5% { opacity: 0.8; }
+            10% { opacity: 1; }
+            15% { opacity: 0.4; }
+            20% { opacity: 1; }
+            25% { opacity: 0.9; }
+            30% { opacity: 1; }
+            35% { opacity: 0.7; }
+            40% { opacity: 1; }
+            45% { opacity: 0.9; }
+            50% { opacity: 1; }
+            55% { opacity: 1; }
+            60% { opacity: 0.8; }
+            65% { opacity: 1; }
+            70% { opacity: 0.9; }
+            75% { opacity: 1; }
+            80% { opacity: 0.8; }
+            85% { opacity: 1; }
+            90% { opacity: 0.6; }
+            95% { opacity: 1; }
+        }
+        
+        @keyframes ripple-effect {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.2); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+        
+        @keyframes ripple-ring {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        
+        @keyframes hover-effect {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-5px) rotate(1deg); }
+            50% { transform: translateY(0) rotate(0deg); }
+            75% { transform: translateY(5px) rotate(-1deg); }
+        }
+
+        /* ---------- Effects ---------- */
+        /* Borders and special effects */
+        .effect-none { display: none; }
+        
+        .effect-glow {
+            box-shadow: 0 0 20px var(--glow-cyan);
+        }
+        
+        .effect-glow-red {
+            box-shadow: 0 0 20px var(--glow-red);
+        }
+        
+        .effect-glow-green {
+            box-shadow: 0 0 20px var(--glow-green);
+        }
+        
+        .effect-glow-blue {
+            box-shadow: 0 0 20px var(--glow-blue);
+        }
+        
+        .effect-glow-purple {
+            box-shadow: 0 0 20px var(--glow-purple);
+        }
+        
+        .effect-border {
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .effect-border-gold {
+            border: 3px solid var(--gold-mid);
+            box-shadow: 0 0 10px var(--gold-mid);
+        }
+        
+        .effect-border-neon {
+            border: 3px solid var(--glow-cyan);
+            box-shadow: 0 0 15px var(--glow-cyan);
+            animation: border-color-shift 5s infinite;
+        }
+        
+        .effect-particles:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSIzIiBmaWxsPSJ3aGl0ZSIgZmlsbC1vcGFjaXR5PSIwLjciLz48Y2lyY2xlIGN4PSIxNTAiIGN5PSIxNjAiIHI9IjQiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuNyIvPjxjaXJjbGUgY3g9IjI1MCIgY3k9IjgwIiByPSIyLjUiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuNyIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjIwMCIgcj0iMiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC43Ii8+PGNpcmNsZSBjeD0iMjAwIiBjeT0iMjUwIiByPSIzLjUiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuNyIvPjxjaXJjbGUgY3g9IjMwMCIgY3k9IjMwMCIgcj0iMyIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC43Ii8+PC9zdmc+');
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0.7;
+            animation: particles-float 15s linear infinite;
+        }
+        
+        .effect-smoke:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 40%;
+            background: radial-gradient(ellipse at center, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
+            z-index: 9;
+            pointer-events: none;
+            opacity: 0.5;
+            animation: smoke-rise 5s ease-out infinite;
+        }
+        
+        /* Effect animations */
+        @keyframes border-color-shift {
+            0% { border-color: var(--glow-red); box-shadow: 0 0 15px var(--glow-red); }
+            20% { border-color: var(--glow-orange); box-shadow: 0 0 15px var(--glow-orange); }
+            40% { border-color: var(--glow-yellow); box-shadow: 0 0 15px var(--glow-yellow); }
+            60% { border-color: var(--glow-green); box-shadow: 0 0 15px var(--glow-green); }
+            80% { border-color: var(--glow-blue); box-shadow: 0 0 15px var(--glow-blue); }
+            100% { border-color: var(--glow-purple); box-shadow: 0 0 15px var(--glow-purple); }
+        }
+        
+        @keyframes particles-float {
+            0% { background-position: 0 0; }
+            100% { background-position: 100px -100px; }
+        }
+        
+        @keyframes smoke-rise {
+            0% { opacity: 0; transform: translateX(-50%) translateY(0) scale(0.8); }
+            20% { opacity: 0.5; }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-100px) scale(1.5); }
+        }
+
+        /* ---------- Navigation ---------- */
+        .nav-controls {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0px;
+            z-index: 100;
+        }
+        
+        .control-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(30, 30, 40, 0.8);
+            border: 2px solid rgba(80, 80, 120, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-button:hover {
+            transform: translateY(-3px);
+            background: rgba(40, 40, 60, 0.9);
+            border-color: var(--glow-cyan);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+        
+        .control-button svg {
+            width: 24px;
+            height: 24px;
+            fill: rgba(255, 255, 255, 0.7);
+            transition: fill 0.3s ease;
+        }
+        
+        .control-button:hover svg {
+            fill: white;
+        }
+        
+        .dropdown-panel {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(20, 20, 35, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            width: 320px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            border: 1px solid rgba(100, 100, 200, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dropdown-panel.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: all;
+        }
+        
+        .panel-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--glow-cyan);
+            text-align: center;
+        }
+        
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+        
+        .option-item {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+        
+        .option-item:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        
+        .option-item.active {
+            border-color: white;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+        
+    .option-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            margin-bottom: 5px;
+            z-index: 200;
+        }
+        
+        .option-item:hover .option-tooltip {
+            opacity: 1;
+        }
+        
+        /* Option Item Visuals */
+        /* Base filters */
+        .filter-original-btn { background: linear-gradient(45deg, #44ff44, #00aa00); }
+        .filter-vibrant-btn { background: linear-gradient(45deg, #ff3300, #ffaa00); }
+        .filter-cool-btn { background: linear-gradient(45deg, #00ccff, #0066ff); }
+        .filter-warm-btn { background: linear-gradient(45deg, #ff6600, #ff0066); }
+        
+        .filter-chrome-btn { background: linear-gradient(45deg, #cccccc, #ffffff); }
+        .filter-gold-btn { background: linear-gradient(45deg, #ffd700, #ff9900); }
+        .filter-copper-btn { background: linear-gradient(45deg, #b87333, #ffa07a); }
+        
+        .filter-invert-btn { background: linear-gradient(45deg, #000000, #555555); }
+        .filter-xray-btn { background: linear-gradient(45deg, #333366, #6666cc); }
+        .filter-blueprint-btn { background: linear-gradient(45deg, #0066cc, #66ccff); }
+        .filter-duotone-btn { background: linear-gradient(45deg, #6600cc, #cc00ff); }
+        .filter-acid-btn { background: linear-gradient(45deg, #66ff00, #00ff66); }
+        .filter-ghost-btn { background: linear-gradient(45deg, #ccccff, #ffffff); opacity: 0.7; }
+        
+        .filter-iridescent-btn { 
+            background: linear-gradient(45deg, #ff00ff, #00ffff); 
+            animation: color-shift 4s infinite linear;
+        }
+        .filter-glitch-btn { 
+            background: #ff00cc;
+            animation: glitch-effect 2s infinite;
+        }
+        .filter-pulse-btn { 
+            background: radial-gradient(circle, #ffffff 0%, #00ccff 100%);
+            animation: pulse-effect 2s infinite alternate;
+        }
+        .filter-disco-btn { 
+            background: conic-gradient(red, magenta, blue, cyan, green, yellow, red);
+            animation: rotate-effect 3s linear infinite;
+        }
+        .filter-rainbow-btn { 
+            background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+            animation: rainbow-shift 3s infinite linear;
+        }
+        .filter-static-btn { 
+            background: repeating-radial-gradient(#333333, #666666 2px);
+            animation: static-filter 0.5s infinite;
+        }
+        
+        /* Overlay buttons */
+        .overlay-neon-glow-btn {
+            background: radial-gradient(circle, var(--neon-pink) 0%, transparent 70%);
+            border: 1px solid var(--neon-pink);
+        }
+        
+        .overlay-cyberpunk-btn {
+            background: linear-gradient(135deg, var(--neon-pink) 0%, var(--cyber-teal) 100%);
+        }
+        
+        .overlay-rainbow-btn {
+            background: conic-gradient(red, orange, yellow, green, blue, indigo, violet, red);
+        }
+        
+        .overlay-noise-btn {
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCI+PGZpbHRlciBpZD0ibm9pc2UiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjMwIiBoZWlnaHQ9IjMwIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjQiLz48L3N2Zz4=');
+            background-color: #222244;
+        }
+        
+        .overlay-vaporwave-btn {
+            background: linear-gradient(135deg, #ff71ce, #01cdfe, #05ffa1);
+        }
+        
+        .overlay-matrix-btn {
+            background-color: #003300;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCI+PHRleHQgeD0iNSIgeT0iMTUiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiMwMGZmMDAiPjE8L3RleHQ+PHRleHQgeD0iMTUiIHk9IjI1IiBmb250LWZhbWlseT0ibW9ub3NwYWNlIiBmb250LXNpemU9IjEwIiBmaWxsPSIjMDBmZjAwIj4wPC90ZXh0Pjwvc3ZnPg==');
+        }
+        
+        .overlay-glitch-btn {
+            background: #330033;
+            position: relative;
+        }
+        
+        .overlay-glitch-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 0, 255, 0.5);
+            animation: glitch-anim 1s infinite;
+        }
+        
+        .overlay-scanline-btn {
+            background-color: #222233;
+            background-image: repeating-linear-gradient(
+                to bottom,
+                transparent,
+                transparent 2px,
+                rgba(255, 255, 255, 0.2) 2px,
+                rgba(255, 255, 255, 0.2) 4px
+            );
+        }
+        
+        .overlay-holographic-btn {
+            background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.8) 100%);
+        }
+        
+        .overlay-solar-flare-btn {
+            background: radial-gradient(circle, rgba(255,255,0,0.8) 0%, rgba(255,140,0,0.8) 50%, transparent 70%);
+        }
+        
+        /* Animation buttons */
+        .anim-pulse-btn {
+            background: radial-gradient(circle, white 0%, #3300ff 100%);
+            animation: pulse-effect 2s infinite alternate;
+        }
+        
+        .anim-rotate-btn {
+            background: conic-gradient(red, orange, yellow, green, blue, indigo, violet, red);
+            animation: rotate-effect 3s linear infinite;
+        }
+        
+        .anim-float-btn {
+            background: linear-gradient(to bottom, #00ccff, #0066ff);
+            animation: float-effect 2s ease-in-out infinite;
+        }
+        
+        .anim-glitch-btn {
+            background: #6600cc;
+            animation: glitch-effect 2s infinite;
+        }
+        
+        .anim-shake-btn {
+            background: #ff3300;
+            animation: shake-effect 0.2s infinite;
+        }
+        
+        .anim-bounce-btn {
+            background: #00cc00;
+            animation: bounce-effect 1s infinite;
+        }
+        
+        .anim-breathe-btn {
+            background: #ff9900;
+            animation: breathe-effect 2s infinite;
+        }
+        
+        .anim-vibrate-btn {
+            background: #cc0066;
+            animation: vibrate-effect 0.1s infinite;
+        }
+        
+        .anim-flicker-btn {
+            background: #ffcc00;
+            animation: flicker-effect 2s infinite;
+        }
+        
+        .anim-ripple-btn {
+            background: #0099cc;
+            animation: ripple-effect 2s infinite;
+        }
+        
+        /* Effect buttons */
+        .effect-glow-btn {
+            background: #222233;
+            box-shadow: 0 0 10px var(--glow-cyan);
+        }
+        
+        .effect-glow-red-btn {
+            background: #222233;
+            box-shadow: 0 0 10px var(--glow-red);
+        }
+        
+        .effect-glow-green-btn {
+            background: #222233;
+            box-shadow: 0 0 10px var(--glow-green);
+        }
+        
+        .effect-glow-blue-btn {
+            background: #222233;
+            box-shadow: 0 0 10px var(--glow-blue);
+        }
+        
+        .effect-glow-purple-btn {
+            background: #222233;
+            box-shadow: 0 0 10px var(--glow-purple);
+        }
+        
+        .effect-border-btn {
+            background: #222233;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .effect-border-gold-btn {
+            background: #222233;
+            border: 3px solid var(--gold-mid);
+            box-shadow: 0 0 5px var(--gold-mid);
+        }
+        
+        .effect-border-neon-btn {
+            background: #222233;
+            border: 3px solid var(--glow-cyan);
+            box-shadow: 0 0 5px var(--glow-cyan);
+            animation: border-color-shift 3s infinite;
+        }
+        
+        .effect-particles-btn {
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCI+PGNpcmNsZSBjeD0iNSIgY3k9IjUiIHI9IjEuNSIgZmlsbD0id2hpdGUiLz48Y2lyY2xlIGN4PSIxNSIgY3k9IjE2IiByPSIxLjgiIGZpbGw9IndoaXRlIi8+PGNpcmNsZSBjeD0iMjUiIGN5PSI4IiByPSIxLjIiIGZpbGw9IndoaXRlIi8+PGNpcmNsZSBjeD0iMTAiIGN5PSIyMCIgcj0iMSIgZmlsbD0id2hpdGUiLz48Y2lyY2xlIGN4PSIyMCIgY3k9IjI1IiByPSIxLjMiIGZpbGw9IndoaXRlIi8+PC9zdmc+');
+            background-color: #000033;
+        }
+        
+        .effect-smoke-btn {
+            background: radial-gradient(ellipse at center bottom, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.1) 60%, rgba(255,255,255,0) 70%);
+            background-color: #333344;
+        }
+        
+        /* Random button with special style */
+        .random-button {
+            background: linear-gradient(45deg, #ff00cc, #3300ff, #00ccff, #00ff66);
+            background-size: 300% 300%;
+            animation: random-gradient 4s ease infinite;
+        }
+        
+        @keyframes random-gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Current config display */
+        .config-display {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: white;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 100;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .config-display:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="ord-wrapper">
+            <div class="inscription-info">Meta Ord #42</div>
+            <div class="config-display">Current Config: Default</div>
+            
+            <!-- Original Meta Ord reference -->
+            <iframe class="base-image" src="https://ordiscan.com/content/fcc15568c10eb15ac4e3a75b84e345075611374ba8e23ec89a5cac5439b29a6bi0"></iframe>
+            <!-- Overlay for visual effects -->
+            <div class="overlay"></div>
+            
+            <!-- Navigation Controls -->
+            <div class="nav-controls">
+                <!-- Base Filter Button -->
+                <div class="control-button" data-panel="filter-panel">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 2c4.42 0 8 3.58 8 8 0 4.42-3.58 8-8 8-4.42 0-8-3.58-8-8 0-4.42 3.58-8 8-8zm0 2c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 2c2.21 0 4 1.79 4 4s-1.79 4-4 4-4-1.79-4-4 1.79-4 4-4z"/></svg>
+                </div>
+                
+                <!-- Overlay Button -->
+                <div class="control-button" data-panel="overlay-panel">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 15.5h-1.5V14h-1v3H8v-3H7v4.5H5.5v-5c0-.55.45-1 1-1H11c.55 0 1 .45 1 1v5zm3.5 0H14v-6h3.5c.55 0 1 .45 1 1V16c0 .55-.45 1-1 1h-2v1.5zm-1-4.5H17v1.5h-2.5V14zm4-3H7V5.5h1.5v2h1v-2h1v2h1v-2h1v2h1v-2H15V9c0-.55.45-1 1-1h2.5c.55 0 1 .45 1 1v1.5c0 .55-.45 1-1 1zm1 0V10h-2.5v.5H18z"/></svg>
+                </div>
+                
+                <!-- Animation Button -->
+                <div class="control-button" data-panel="animation-panel">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 2C2.89 2 2 2.89 2 4V14H4V4H14V2H4M8 6C6.89 6 6 6.89 6 8V18H8V8H18V6H8M12 10C10.89 10 10 10.89 10 12V20C10 21.11 10.89 22 12 22H20C21.11 22 22 21.11 22 20V12C22 10.89 21.11 10 20 10H12Z"/></svg>
+                </div>
+                
+                <!-- Effects Button -->
+                <div class="control-button" data-panel="effects-panel">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.07 4.93l-1.41 1.41c1.78 1.77 1.78 4.64 0 6.42-1.78 1.77-4.66 1.77-6.44 0-1.78-1.78-1.78-4.65 0-6.42l-1.41-1.41c-2.56 2.56-2.56 6.68 0 9.24 2.56 2.56 6.71 2.56 9.26 0 2.56-2.56 2.56-6.68 0-9.24zM8.8 19.56c-1.78-1.77-1.78-4.64 0-6.42 1.78-1.77 4.66-1.77 6.44 0 1.78 1.78 1.78 4.65 0 6.42l1.41 1.41c2.56-2.56 2.56-6.68 0-9.24-2.56-2.56-6.71-2.56-9.26 0-2.56 2.56-2.56 6.68 0 9.24l1.41-1.41z"/></svg>
+                </div>
+                
+                <!-- Base Color Button -->
+                <div class="control-button" data-panel="base-color-panel">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 2c4.42 0 8 3.58 8 8 0 4.42-3.58 8-8 8-4.42 0-8-3.58-8-8 0-4.42 3.58-8 8-8zm0 2c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z"/></svg>
+                </div>
+
+                <!-- Background Color Button -->
+                <div class="control-button" data-panel="background-color-panel">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm7 2c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z"/></svg>
+                </div>
+                
+                <!-- Random Button -->
+                <div class="control-button random-button" onclick="generateRandomConfig()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.65 6.35c-1.63-1.63-3.94-2.57-6.48-2.31-3.67.37-6.69 3.35-7.1 7.02C3.52 15.91 7.27 20 12 20c3.19 0 5.93-1.87 7.21-4.56.32-.67-.16-1.44-.9-1.44-.37 0-.72.2-.88.53-1.13 2.43-3.84 3.97-6.8 3.31-2.22-.49-4.01-2.3-4.48-4.52C5.31 9.44 8.26 6 12 6c1.66 0 3.14.69 4.22 1.78l-1.51 1.51c-.63.63-.19 1.71.7 1.71H19c.55 0 1-.45 1-1V6.41c0-.89-1.08-1.34-1.71-.71l-.64.65z"/></svg>
+                </div>
+            </div>
+            
+            <!-- Dropdown Panels -->
+            <div class="dropdown-panel" id="filter-panel">
+                <div class="panel-title">Base Filter</div>
+                <div class="option-grid">
+                    <div class="option-item filter-original-btn" data-filter="filter-original">
+                        <div class="option-tooltip">Original</div>
+                    </div>
+                    <div class="option-item filter-vibrant-btn" data-filter="filter-vibrant">
+                        <div class="option-tooltip">Vibrant</div>
+                    </div>
+                    <div class="option-item filter-cool-btn" data-filter="filter-cool">
+                        <div class="option-tooltip">Cool</div>
+                    </div>
+                    <div class="option-item filter-warm-btn" data-filter="filter-warm">
+                        <div class="option-tooltip">Warm</div>
+                    </div>
+                    <div class="option-item filter-chrome-btn" data-filter="filter-chrome">
+                        <div class="option-tooltip">Chrome</div>
+                    </div>
+                    
+                    <div class="option-item filter-gold-btn" data-filter="filter-gold">
+                        <div class="option-tooltip">Gold</div>
+                    </div>
+                    <div class="option-item filter-copper-btn" data-filter="filter-copper">
+                        <div class="option-tooltip">Copper</div>
+                    </div>
+                    <div class="option-item filter-invert-btn" data-filter="filter-invert">
+                        <div class="option-tooltip">Invert</div>
+                    </div>
+                    <div class="option-item filter-xray-btn" data-filter="filter-xray">
+                        <div class="option-tooltip">X-Ray</div>
+                    </div>
+                    <div class="option-item filter-blueprint-btn" data-filter="filter-blueprint">
+                        <div class="option-tooltip">Blueprint</div>
+                    </div>
+                    
+                    <div class="option-item filter-duotone-btn" data-filter="filter-duotone">
+                        <div class="option-tooltip">Duotone</div>
+                    </div>
+                    <div class="option-item filter-acid-btn" data-filter="filter-acid">
+                        <div class="option-tooltip">Acid</div>
+                    </div>
+                    <div class="option-item filter-ghost-btn" data-filter="filter-ghost">
+                        <div class="option-tooltip">Ghost</div>
+                    </div>
+                    <div class="option-item filter-iridescent-btn" data-filter="filter-iridescent">
+                        <div class="option-tooltip">Iridescent</div>
+                    </div>
+                    <div class="option-item filter-glitch-btn" data-filter="filter-glitch">
+                        <div class="option-tooltip">Glitch</div>
+                    </div>
+                    
+                    <div class="option-item filter-pulse-btn" data-filter="filter-pulse">
+                        <div class="option-tooltip">Pulse</div>
+                    </div>
+                    <div class="option-item filter-disco-btn" data-filter="filter-disco">
+                        <div class="option-tooltip">Disco</div>
+                    </div>
+                    <div class="option-item filter-rainbow-btn" data-filter="filter-rainbow">
+                        <div class="option-tooltip">Rainbow</div>
+                    </div>
+                    <div class="option-item filter-static-btn" data-filter="filter-static">
+                        <div class="option-tooltip">Static</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dropdown-panel" id="overlay-panel">
+                <div class="panel-title">Overlay Effect</div>
+                <div class="option-grid">
+                    <div class="option-item overlay-neon-glow-btn" data-overlay="overlay-neon-glow">
+                        <div class="option-tooltip">Neon Glow</div>
+                    </div>
+                    <div class="option-item overlay-cyberpunk-btn" data-overlay="overlay-cyberpunk">
+                        <div class="option-tooltip">Cyberpunk</div>
+                    </div>
+                    <div class="option-item overlay-rainbow-btn" data-overlay="overlay-rainbow">
+                        <div class="option-tooltip">Rainbow</div>
+                    </div>
+                    <div class="option-item overlay-noise-btn" data-overlay="overlay-noise">
+                        <div class="option-tooltip">Noise</div>
+                    </div>
+                    <div class="option-item overlay-vaporwave-btn" data-overlay="overlay-vaporwave">
+                        <div class="option-tooltip">Vaporwave</div>
+                    </div>
+                    
+                    <div class="option-item overlay-matrix-btn" data-overlay="overlay-matrix">
+                        <div class="option-tooltip">Matrix</div>
+                    </div>
+                    <div class="option-item overlay-glitch-btn" data-overlay="overlay-glitch">
+                        <div class="option-tooltip">Glitch</div>
+                    </div>
+                    <div class="option-item overlay-scanline-btn" data-overlay="overlay-scanline">
+                        <div class="option-tooltip">Scanline</div>
+                    </div>
+                    <div class="option-item overlay-holographic-btn" data-overlay="overlay-holographic">
+                        <div class="option-tooltip">Holographic</div>
+                    </div>
+                    <div class="option-item overlay-solar-flare-btn" data-overlay="overlay-solar-flare">
+                        <div class="option-tooltip">Solar Flare</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dropdown-panel" id="animation-panel">
+                <div class="panel-title">Animation</div>
+                <div class="option-grid">
+                    <div class="option-item anim-pulse-btn" data-animation="anim-pulse">
+                        <div class="option-tooltip">Pulse</div>
+                    </div>
+                    <div class="option-item anim-rotate-btn" data-animation="anim-rotate">
+                        <div class="option-tooltip">Rotate</div>
+                    </div>
+                    <div class="option-item anim-float-btn" data-animation="anim-float">
+                        <div class="option-tooltip">Float</div>
+                    </div>
+                    <div class="option-item anim-glitch-btn" data-animation="anim-glitch">
+                        <div class="option-tooltip">Glitch</div>
+                    </div>
+                    <div class="option-item anim-shake-btn" data-animation="anim-shake">
+                        <div class="option-tooltip">Shake</div>
+                    </div>
+                    
+                    <div class="option-item anim-bounce-btn" data-animation="anim-bounce">
+                        <div class="option-tooltip">Bounce</div>
+                    </div>
+                    <div class="option-item anim-breathe-btn" data-animation="anim-breathe">
+                        <div class="option-tooltip">Breathe</div>
+                    </div>
+                    <div class="option-item anim-vibrate-btn" data-animation="anim-vibrate">
+                        <div class="option-tooltip">Vibrate</div>
+                    </div>
+                    <div class="option-item anim-flicker-btn" data-animation="anim-flicker">
+                        <div class="option-tooltip">Flicker</div>
+                    </div>
+                    <div class="option-item anim-ripple-btn" data-animation="anim-ripple">
+                        <div class="option-tooltip">Ripple</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dropdown-panel" id="effects-panel">
+                <div class="panel-title">Special Effects</div>
+                <div class="option-grid">
+                    <div class="option-item effect-glow-btn" data-effect="effect-glow">
+                        <div class="option-tooltip">Cyan Glow</div>
+                    </div>
+                    <div class="option-item effect-glow-red-btn" data-effect="effect-glow-red">
+                        <div class="option-tooltip">Red Glow</div>
+                    </div>
+                    <div class="option-item effect-glow-green-btn" data-effect="effect-glow-green">
+                        <div class="option-tooltip">Green Glow</div>
+                    </div>
+                    <div class="option-item effect-glow-blue-btn" data-effect="effect-glow-blue">
+                        <div class="option-tooltip">Blue Glow</div>
+                    </div>
+                    <div class="option-item effect-glow-purple-btn" data-effect="effect-glow-purple">
+                        <div class="option-tooltip">Purple Glow</div>
+                    </div>
+                    
+                    <div class="option-item effect-border-btn" data-effect="effect-border">
+                        <div class="option-tooltip">Border</div>
+                    </div>
+                    <div class="option-item effect-border-gold-btn" data-effect="effect-border-gold">
+                        <div class="option-tooltip">Gold Border</div>
+                    </div>
+                    <div class="option-item effect-border-neon-btn" data-effect="effect-border-neon">
+                        <div class="option-tooltip">Neon Border</div>
+                    </div>
+                    <div class="option-item effect-particles-btn" data-effect="effect-particles">
+                        <div class="option-tooltip">Particles</div>
+                    </div>
+                    <div class="option-item effect-smoke-btn" data-effect="effect-smoke">
+                        <div class="option-tooltip">Smoke</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dropdown-panel" id="base-color-panel">
+                <div class="panel-title">Base Color</div>
+                <div class="option-grid">
+                    <div class="option-item" data-base-color="red" style="background: red;"></div>
+                    <div class="option-item" data-base-color="blue" style="background: blue;"></div>
+                    <div class="option-item" data-base-color="green" style="background: green;"></div>
+                    <div class="option-item" data-base-color="yellow" style="background: yellow;"></div>
+                    <div class="option-item" data-base-color="white" style="background: white; border: 1px solid black;"></div>
+                </div>
+            </div>
+
+            <div class="dropdown-panel" id="background-color-panel">
+                <div class="panel-title">Background Color</div>
+                <div class="option-grid">
+                    <div class="option-item" data-background-color="transparent" style="background: transparent; border: 1px solid white;"></div>
+                    <div class="option-item" data-background-color="black" style="background: black;"></div>
+                    <div class="option-item" data-background-color="gray" style="background: gray;"></div>
+                    <div class="option-item" data-background-color="pink" style="background: pink;"></div>
+                    <div class="option-item" data-background-color="cyan" style="background: cyan;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       document.addEventListener('DOMContentLoaded', function() {
+            // Configuration state
+            const config = {
+                filter: null,
+                overlay: null,
+                animation: null,
+                effect: null
+            };
+            
+            // Get DOM elements
+            const ordWrapper = document.querySelector('.ord-wrapper');
+            const overlayElement = document.querySelector('.overlay');
+            const configDisplay = document.querySelector('.config-display');
+            
+            // Control panel handling
+            const controlButtons = document.querySelectorAll('.control-button');
+            const dropdownPanels = document.querySelectorAll('.dropdown-panel');
+            
+            // Toggle panels
+            controlButtons.forEach(button => {
+                if (!button.classList.contains('random-button')) {
+                    button.addEventListener('click', function() {
+                        const panelId = this.getAttribute('data-panel');
+                        const panel = document.getElementById(panelId);
+                        
+                        // Close all other panels
+                        dropdownPanels.forEach(p => {
+                            if (p.id !== panelId) {
+                                p.classList.remove('active');
+                            }
+                        });
+                        
+                        // Toggle the clicked panel
+                        panel.classList.toggle('active');
+                    });
+                }
+            });
+            
+            // Close panels when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.control-button') && !e.target.closest('.dropdown-panel')) {
+                    dropdownPanels.forEach(panel => {
+                        panel.classList.remove('active');
+                    });
+                }
+            });
+            
+            // Base filter selection
+            const filterOptions = document.querySelectorAll('[data-filter]');
+            filterOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    
+                    // Remove all filter classes
+                    filterOptions.forEach(opt => {
+                        const f = opt.getAttribute('data-filter');
+                        ordWrapper.classList.remove(f);
+                        opt.classList.remove('active');
+                    });
+                    
+                    // Apply new filter if it's different
+                    if (config.filter !== filter) {
+                        ordWrapper.classList.add(filter);
+                        this.classList.add('active');
+                        config.filter = filter;
+                    } else {
+                        config.filter = null;
+                    }
+                    
+                    updateConfigDisplay();
+                });
+            });
+            
+            // Overlay selection
+            const overlayOptions = document.querySelectorAll('[data-overlay]');
+            overlayOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const overlay = this.getAttribute('data-overlay');
+                    
+                    // Remove all overlay classes
+                    overlayOptions.forEach(opt => {
+                        const o = opt.getAttribute('data-overlay');
+                        overlayElement.classList.remove(o);
+                        opt.classList.remove('active');
+                    });
+                    
+                    // Apply new overlay if it's different
+                    if (config.overlay !== overlay) {
+                        overlayElement.classList.add(overlay);
+                        overlayElement.style.opacity = '1';
+                        this.classList.add('active');
+                        config.overlay = overlay;
+                    } else {
+                        overlayElement.style.opacity = '0';
+                        config.overlay = null;
+                    }
+                    
+                    updateConfigDisplay();
+                });
+            });
+            
+            // Animation selection
+            const animationOptions = document.querySelectorAll('[data-animation]');
+            animationOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const animation = this.getAttribute('data-animation');
+                    
+                    // Remove all animation classes
+                    animationOptions.forEach(opt => {
+                        const a = opt.getAttribute('data-animation');
+                        ordWrapper.classList.remove(a);
+                        opt.classList.remove('active');
+                    });
+                    
+                    // Apply new animation if it's different
+                    if (config.animation !== animation) {
+                        ordWrapper.classList.add(animation);
+                        this.classList.add('active');
+                        config.animation = animation;
+                    } else {
+                        config.animation = null;
+                    }
+                    
+                    updateConfigDisplay();
+                });
+            });
+            
+            // Effect selection
+            const effectOptions = document.querySelectorAll('[data-effect]');
+            effectOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const effect = this.getAttribute('data-effect');
+                    
+                    // Remove all effect classes
+                    effectOptions.forEach(opt => {
+                        const e = opt.getAttribute('data-effect');
+                        ordWrapper.classList.remove(e);
+                        opt.classList.remove('active');
+                    });
+                    
+                    // Apply new effect if it's different
+                    if (config.effect !== effect) {
+                        ordWrapper.classList.add(effect);
+                        this.classList.add('active');
+                        config.effect = effect;
+                    } else {
+                        config.effect = null;
+                    }
+                    
+                    updateConfigDisplay();
+                });
+            });
+
+            // Base color selection
+            const baseColorOptions = document.querySelectorAll('[data-base-color]');
+            baseColorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const baseColor = this.getAttribute('data-base-color');
+                    const baseImage = document.querySelector('.base-image');
+                    baseImage.style.backgroundColor = baseColor;
+                });
+            });
+
+            // Background color selection
+            const backgroundColorOptions = document.querySelectorAll('[data-background-color]');
+            backgroundColorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const backgroundColor = this.getAttribute('data-background-color');
+                    const ordWrapper = document.querySelector('.ord-wrapper');
+                    ordWrapper.style.backgroundColor = backgroundColor;
+                });
+            });
+            
+            // Update config display
+            function updateConfigDisplay() {
+                let configText = 'Current Config: ';
+                
+                if (config.filter) {
+                    configText += formatName(config.filter);
+                }
+                
+                if (config.overlay) {
+                    configText += (config.filter ? ' + ' : '') + formatName(config.overlay);
+                }
+                
+                if (config.animation) {
+                    configText += ((config.filter || config.overlay) ? ' + ' : '') + formatName(config.animation);
+                }
+                
+                if (config.effect) {
+                    configText += ((config.filter || config.overlay || config.animation) ? ' + ' : '') + formatName(config.effect);
+                }
+                
+                if (!config.filter && !config.overlay && !config.animation && !config.effect) {
+                    configText += 'Default';
+                }
+                
+                configDisplay.textContent = configText;
+            }
+            
+            function formatName(name) {
+                // Extract the actual name from the class, e.g., filter-vibrant -> Vibrant
+                const parts = name.split('-');
+                return parts.slice(1).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+            }
+            
+            // Tooltip handling
+            document.querySelectorAll('.option-item').forEach(item => {
+                const tooltip = item.querySelector('.option-tooltip');
+                if (tooltip) {
+                    item.addEventListener('mouseenter', () => {
+                        tooltip.style.opacity = '1';
+                    });
+                    
+                    item.addEventListener('mouseleave', () => {
+                        tooltip.style.opacity = '0';
+                    });
+                }
+            });
+        });
+        
+        // Generate random configuration
+        function generateRandomConfig() {
+            // Arrays of possible values
+            const filters = [
+                'filter-original', 'filter-vibrant', 'filter-cool', 'filter-warm',
+                'filter-chrome', 'filter-gold', 'filter-copper', 'filter-invert',
+                'filter-xray', 'filter-blueprint', 'filter-duotone', 'filter-acid',
+                'filter-ghost', 'filter-iridescent', 'filter-glitch', 'filter-pulse',
+                'filter-disco', 'filter-rainbow', 'filter-static'
+            ];
+            
+            const overlays = [
+                'overlay-neon-glow', 'overlay-cyberpunk', 'overlay-rainbow', 
+                'overlay-noise', 'overlay-vaporwave', 'overlay-matrix',
+                'overlay-glitch', 'overlay-scanline', 'overlay-holographic',
+                'overlay-solar-flare'
+            ];
+            
+            const animations = [
+                'anim-pulse', 'anim-rotate', 'anim-float', 'anim-glitch',
+                'anim-shake', 'anim-bounce', 'anim-breathe', 'anim-vibrate',
+                'anim-flicker', 'anim-ripple'
+            ];
+            
+            const effects = [
+                'effect-glow', 'effect-glow-red', 'effect-glow-green',
+                'effect-glow-blue', 'effect-glow-purple', 'effect-border',
+                'effect-border-gold', 'effect-border-neon', 'effect-particles',
+                'effect-smoke'
+            ];
+            
+            // Randomly select values
+            const randomFilter = filters[Math.floor(Math.random() * filters.length)];
+            const randomOverlay = overlays[Math.floor(Math.random() * overlays.length)];
+            const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
+            const randomEffect = effects[Math.floor(Math.random() * effects.length)];
+            
+            // Get DOM elements
+            const ordWrapper = document.querySelector('.ord-wrapper');
+            const overlayElement = document.querySelector('.overlay');
+            
+            // Clear all existing classes except 'ord-wrapper'
+            ordWrapper.className = 'ord-wrapper';
+            overlayElement.className = 'overlay';
+            
+            // Apply random filter
+            ordWrapper.classList.add(randomFilter);
+            
+            // Apply random overlay (50% chance)
+            if (Math.random() > 0.5) {
+                overlayElement.classList.add(randomOverlay);
+                overlayElement.style.opacity = '1';
+            } else {
+                overlayElement.style.opacity = '0';
+            }
+            
+            // Apply random animation (50% chance)
+            if (Math.random() > 0.5) {
+                ordWrapper.classList.add(randomAnimation);
+            }
+            
+            // Apply random effect (50% chance)
+            if (Math.random() > 0.5) {
+                ordWrapper.classList.add(randomEffect);
+            }
+            
+            // Update active states in UI
+            document.querySelectorAll('.option-item').forEach(item => {
+                item.classList.remove('active');
+                
+                const itemFilter = item.getAttribute('data-filter');
+                const itemOverlay = item.getAttribute('data-overlay');
+                const itemAnimation = item.getAttribute('data-animation');
+                const itemEffect = item.getAttribute('data-effect');
+                
+                if (itemFilter === randomFilter) {
+                    item.classList.add('active');
+                }
+                
+                if (itemOverlay === randomOverlay && overlayElement.style.opacity === '1') {
+                    item.classList.add('active');
+                }
+                
+                if (itemAnimation === randomAnimation && ordWrapper.classList.contains(randomAnimation)) {
+                    item.classList.add('active');
+                }
+                
+                if (itemEffect === randomEffect && ordWrapper.classList.contains(randomEffect)) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Update config state and display
+            const config = {
+                filter: ordWrapper.classList.contains(randomFilter) ? randomFilter : null,
+                overlay: overlayElement.style.opacity === '1' ? randomOverlay : null,
+                animation: ordWrapper.classList.contains(randomAnimation) ? randomAnimation : null,
+                effect: ordWrapper.classList.contains(randomEffect) ? randomEffect : null
+            };
+            
+            let configText = 'Current Config: ';
+            
+            if (config.filter) {
+                configText += formatName(config.filter);
+            }
+            
+            if (config.overlay) {
+                configText += (config.filter ? ' + ' : '') + formatName(config.overlay);
+            }
+            
+            if (config.animation) {
+                configText += ((config.filter || config.overlay) ? ' + ' : '') + formatName(config.animation);
+            }
+            
+            if (config.effect) {
+                configText += ((config.filter || config.overlay || config.animation) ? ' + ' : '') + formatName(config.effect);
+            }
+            
+            if (!config.filter && !config.overlay && !config.animation && !config.effect) {
+                configText += 'Default';
+            }
+            
+            document.querySelector('.config-display').textContent = configText;
+        }
+        
+        function formatName(name) {
+            // Extract the actual name from the class, e.g., filter-vibrant -> Vibrant
+            const parts = name.split('-');
+            return parts.slice(1).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+        }
+    </script>
+</body>
+</html>
