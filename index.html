@@ -59,8 +59,6 @@
             overflow: visible;
             transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-            background-color: transparent; /* Default */
-            transition: background-color 0.3s ease;
         }
         
         .ord-wrapper:hover {
@@ -97,8 +95,6 @@
             border: none;
             z-index: 0;
             transition: filter 0.5s ease;
-            background-color: transparent; /* Default */
-            transition: background-color 0.3s ease;
         }
         
         .overlay {
@@ -945,16 +941,6 @@
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.07 4.93l-1.41 1.41c1.78 1.77 1.78 4.64 0 6.42-1.78 1.77-4.66 1.77-6.44 0-1.78-1.78-1.78-4.65 0-6.42l-1.41-1.41c-2.56 2.56-2.56 6.68 0 9.24 2.56 2.56 6.71 2.56 9.26 0 2.56-2.56 2.56-6.68 0-9.24zM8.8 19.56c-1.78-1.77-1.78-4.64 0-6.42 1.78-1.77 4.66-1.77 6.44 0 1.78 1.78 1.78 4.65 0 6.42l1.41 1.41c2.56-2.56 2.56-6.68 0-9.24-2.56-2.56-6.71-2.56-9.26 0-2.56 2.56-2.56 6.68 0 9.24l1.41-1.41z"/></svg>
                 </div>
                 
-                <!-- Base Color Button -->
-                <div class="control-button" data-panel="base-color-panel">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 2c4.42 0 8 3.58 8 8 0 4.42-3.58 8-8 8-4.42 0-8-3.58-8-8 0-4.42 3.58-8 8-8zm0 2c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z"/></svg>
-                </div>
-
-                <!-- Background Color Button -->
-                <div class="control-button" data-panel="background-color-panel">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm7 2c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z"/></svg>
-                </div>
-                
                 <!-- Random Button -->
                 <div class="control-button random-button" onclick="generateRandomConfig()">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.65 6.35c-1.63-1.63-3.94-2.57-6.48-2.31-3.67.37-6.69 3.35-7.1 7.02C3.52 15.91 7.27 20 12 20c3.19 0 5.93-1.87 7.21-4.56.32-.67-.16-1.44-.9-1.44-.37 0-.72.2-.88.53-1.13 2.43-3.84 3.97-6.8 3.31-2.22-.49-4.01-2.3-4.48-4.52C5.31 9.44 8.26 6 12 6c1.66 0 3.14.69 4.22 1.78l-1.51 1.51c-.63.63-.19 1.71.7 1.71H19c.55 0 1-.45 1-1V6.41c0-.89-1.08-1.34-1.71-.71l-.64.65z"/></svg>
@@ -1138,28 +1124,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="dropdown-panel" id="base-color-panel">
-                <div class="panel-title">Base Color</div>
-                <div class="option-grid">
-                    <div class="option-item" data-base-color="red" style="background: red;"></div>
-                    <div class="option-item" data-base-color="blue" style="background: blue;"></div>
-                    <div class="option-item" data-base-color="green" style="background: green;"></div>
-                    <div class="option-item" data-base-color="yellow" style="background: yellow;"></div>
-                    <div class="option-item" data-base-color="white" style="background: white; border: 1px solid black;"></div>
-                </div>
-            </div>
-
-            <div class="dropdown-panel" id="background-color-panel">
-                <div class="panel-title">Background Color</div>
-                <div class="option-grid">
-                    <div class="option-item" data-background-color="transparent" style="background: transparent; border: 1px solid white;"></div>
-                    <div class="option-item" data-background-color="black" style="background: black;"></div>
-                    <div class="option-item" data-background-color="gray" style="background: gray;"></div>
-                    <div class="option-item" data-background-color="pink" style="background: pink;"></div>
-                    <div class="option-item" data-background-color="cyan" style="background: cyan;"></div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -1314,26 +1278,6 @@
                     }
                     
                     updateConfigDisplay();
-                });
-            });
-
-            // Base color selection
-            const baseColorOptions = document.querySelectorAll('[data-base-color]');
-            baseColorOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    const baseColor = this.getAttribute('data-base-color');
-                    const baseImage = document.querySelector('.base-image');
-                    baseImage.style.backgroundColor = baseColor;
-                });
-            });
-
-            // Background color selection
-            const backgroundColorOptions = document.querySelectorAll('[data-background-color]');
-            backgroundColorOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    const backgroundColor = this.getAttribute('data-background-color');
-                    const ordWrapper = document.querySelector('.ord-wrapper');
-                    ordWrapper.style.backgroundColor = backgroundColor;
                 });
             });
             
